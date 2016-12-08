@@ -2,7 +2,8 @@ package log
 
 import (
 	"fmt"
-	"github.com/Bruinxs/log/dw"
+	"github.com/Bruinxs/uio/dw"
+	"github.com/Bruinxs/uio/dw/replace"
 	"io"
 	"log"
 	"os"
@@ -34,7 +35,11 @@ func (this *Log) Log(cd, level int, prefix, format string, v ...interface{}) err
 	if level > this.level {
 		return nil
 	}
-	return this.Logger.Output(cd, fmt.Sprintf("%v %v", prefix, fmt.Sprintf(format, v...)))
+	err := this.Logger.Output(cd, fmt.Sprintf("%v %v", prefix, fmt.Sprintf(format, v...)))
+	if err != nil && os.Stderr != nil {
+		os.Stderr.Write([]byte(fmt.Sprintf("[E] try to out put log err. log(%v), err(%v)", fmt.Sprintf("%v %v", prefix, fmt.Sprintf(format, v...)), err)))
+	}
+	return err
 }
 
 func (this *Log) SetOutput(w io.Writer) {
@@ -57,6 +62,6 @@ func E(format string, v ...interface{}) {
 	defLog.Log(3, ERROR, "[E]", format, v...)
 }
 
-func SetOutPut(filename string) {
-	defLog.SetOutput(dw.NewDateWriter(filename))
+func DateOutPut(filename string) {
+	defLog.SetOutput(dw.NewDateWriter(replace.NewFileReplacer(filename), 0))
 }
