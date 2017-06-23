@@ -2,11 +2,12 @@ package log
 
 import (
 	"fmt"
-	"github.com/Bruinxs/uio/dw"
-	"github.com/Bruinxs/uio/dw/replace"
 	"io"
 	"log"
 	"os"
+
+	"github.com/bruinxs/uio/dw"
+	"github.com/bruinxs/uio/dw/replace"
 )
 
 //log level
