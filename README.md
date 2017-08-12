@@ -1,3 +1,3 @@
-# glog
-1. level
-2. date
+logger
+------
+wrap logger simply

@@ -5,64 +5,104 @@ import (
 	"io"
 	"log"
 	"os"
-
-	"github.com/bruinxs/uio/dw"
-	"github.com/bruinxs/uio/dw/replace"
 )
 
-//log level
+// enum log level
 const (
-	ERROR = iota
-	WARNING
+	ERROR Level = 1 << iota
+	WARN
 	INFO
 	DEBUG
 )
 
-var defLog = NewLog(os.Stdout)
+var _log *Logger
 
-type Log struct {
-	level int
-	*log.Logger
-}
-
-func NewLog(w io.Writer) *Log {
-	return &Log{
+func init() {
+	_log = &Logger{
 		level:  DEBUG,
-		Logger: log.New(w, "", log.LstdFlags|log.Lshortfile),
+		Logger: log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
 	}
 }
 
-func (this *Log) Log(cd, level int, prefix, format string, v ...interface{}) error {
-	if level > this.level {
-		return nil
+// Level log level
+type Level int
+
+func (level Level) String() string {
+	switch level {
+	case ERROR:
+		return "[error]"
+	case WARN:
+		return "[warn ]"
+	case INFO:
+		return "[info ]"
+	case DEBUG:
+		return "[debug]"
 	}
-	err := this.Logger.Output(cd, fmt.Sprintf("%v %v", prefix, fmt.Sprintf(format, v...)))
-	if err != nil && os.Stderr != nil {
-		os.Stderr.Write([]byte(fmt.Sprintf("[E] try to out put log err. log(%v), err(%v)", fmt.Sprintf("%v %v", prefix, fmt.Sprintf(format, v...)), err)))
+	return ""
+}
+
+// Logger logger with level
+type Logger struct {
+	*log.Logger
+	level Level
+}
+
+func (l *Logger) log(calldepth int, level Level, s string) {
+	if l.level < level {
+		return
 	}
-	return err
+	err := l.Output(calldepth, fmt.Sprintf("%s %s", level, s))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
 }
 
-func (this *Log) SetOutput(w io.Writer) {
-	this.Logger.SetOutput(w)
+// SetFlags sets the out put flag
+func SetFlags(flag int) {
+	_log.SetFlags(flag)
 }
 
-func D(format string, v ...interface{}) {
-	defLog.Log(3, DEBUG, "[D]", format, v...)
+// SetOutput sets the output destination
+func SetOutput(w io.Writer) {
+	_log.SetOutput(w)
 }
 
-func I(format string, v ...interface{}) {
-	defLog.Log(3, INFO, "[I]", format, v...)
+// Error output with ERROR level
+func Error(v ...interface{}) {
+	_log.log(3, ERROR, fmt.Sprint(v...))
 }
 
-func W(format string, v ...interface{}) {
-	defLog.Log(3, WARNING, "[W]", format, v...)
+// Errorf output with ERROR level, Arguments are handled in the manner of fmt.Sprintf
+func Errorf(format string, v ...interface{}) {
+	_log.log(3, ERROR, fmt.Sprintf(format, v...))
 }
 
-func E(format string, v ...interface{}) {
-	defLog.Log(3, ERROR, "[E]", format, v...)
+// Warn output with WARN level
+func Warn(v ...interface{}) {
+	_log.log(3, WARN, fmt.Sprint(v...))
 }
 
-func DateOutPut(filename string) {
-	defLog.SetOutput(dw.NewDateWriter(replace.NewFileReplacer(filename), 0))
+// Warnf output with WARN level, Arguments are handled in the manner of fmt.Sprintf
+func Warnf(format string, v ...interface{}) {
+	_log.log(3, WARN, fmt.Sprintf(format, v...))
+}
+
+// Info output with INFO level
+func Info(v ...interface{}) {
+	_log.log(3, INFO, fmt.Sprint(v...))
+}
+
+// Infof output with INFO level, Arguments are handled in the manner of fmt.Sprintf
+func Infof(format string, v ...interface{}) {
+	_log.log(3, INFO, fmt.Sprintf(format, v...))
+}
+
+// Debug output with DEBUG level
+func Debug(v ...interface{}) {
+	_log.log(3, DEBUG, fmt.Sprint(v...))
+}
+
+// Debugf output with DEBUG level, Arguments are handled in the manner of fmt.Sprintf
+func Debugf(format string, v ...interface{}) {
+	_log.log(3, DEBUG, fmt.Sprintf(format, v...))
 }

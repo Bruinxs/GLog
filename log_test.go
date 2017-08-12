@@ -1,7 +1,6 @@
 package log_test
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -9,24 +8,12 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	log.D("num: %v", 1)
-	log.I("string: %v", "fake str")
-	log.W("bool: %v", true)
-	log.E("time: %v", time.Now())
-}
-
-func BenchmarkDateOutPut(b *testing.B) {
-	tmp := "/tmp/benchmark_dir/"
-	filename := tmp + "output-%v.log"
-	content := "abcdefghijklmnopqrstuvwsyz"
-	log.DateOutPut(filename)
-	b.RunParallel(func(pb *testing.PB) {
-		for pb.Next() {
-			log.D("%v", content)
-			log.I("%v", content)
-			log.W("%v", content)
-			log.E("%v", content)
-		}
-	})
-	os.RemoveAll(tmp)
+	log.Debugf("num: %v", 1)
+	log.Infof("string: %v", "fake str")
+	log.Warnf("bool: %v", true)
+	log.Errorf("time: %v", time.Now())
+	log.Debug("num: ", 1)
+	log.Info("string: ", "fake str")
+	log.Warn("bool: ", true)
+	log.Error("time: ", time.Now())
 }
