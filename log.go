@@ -57,6 +57,16 @@ func (l *Logger) log(calldepth int, level Level, s string) {
 	}
 }
 
+//SetLevel set log level
+func (l *Logger) SetLevel(level Level) {
+	l.level = level
+}
+
+//SetLevel set defalut log level
+func SetLevel(level Level) {
+	_log.SetLevel(level)
+}
+
 // SetFlags sets the out put flag
 func SetFlags(flag int) {
 	_log.SetFlags(flag)
