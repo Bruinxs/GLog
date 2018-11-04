@@ -1,6 +1,10 @@
 package log_test
 
 import (
+	"bytes"
+	"fmt"
+	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,4 +20,29 @@ func TestLog(t *testing.T) {
 	log.Info("string: ", "fake str")
 	log.Warn("bool: ", true)
 	log.Error("time: ", time.Now())
+}
+
+func TestLogger(t *testing.T) {
+	logger := log.NewLogger("test")
+	buf := bytes.NewBuffer(nil)
+	logger.SetOutput(buf)
+
+	line := codeLine()
+	logger.Error("error")
+	logger.Debug("debug")
+
+	out := buf.String()
+	for _, want := range []string{
+		fmt.Sprintf("log_test.go:%d: [error][test] error\n", line+1),
+		fmt.Sprintf("log_test.go:%d: [debug][test] debug", line+2),
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatal(out)
+		}
+	}
+}
+
+func codeLine() int {
+	_, _, line, _ := runtime.Caller(1)
+	return line
 }
